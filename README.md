@@ -1,2 +1,2 @@
 # msd_finalproject
-final project for modeling social data
+very,very basic draft of final project for modeling social data
