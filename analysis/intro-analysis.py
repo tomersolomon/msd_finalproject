@@ -25,9 +25,18 @@ def getData():
 	paths_fin_df['pathlength'] = paths_fin_df["path"].apply(len)
 	return paths_fin_df
 
+def gen_plots(paths_fin_df):
+	fig = plt.figure()
+	axes = fig.add_subplot(1,1,1)
+
+	
+	paths_fin_df['pathlength'].plot(kind='hist', ax=axes,logy=True, xlim=(0,150), bins=50)
+	axes.set_xlabel("path-length")
+	axes.set_ylabel("frequency")
+	plt.show()
 def main():
 	paths_fin_df = getData()
-	print(paths_fin_df.head(n=10))
+	gen_plots(paths_fin_df)
 
 if __name__ == "__main__":
 	main()
