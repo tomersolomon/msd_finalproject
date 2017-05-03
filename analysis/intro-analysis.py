@@ -46,6 +46,20 @@ def shortest_path_analysis(df):
 	freq_sh_paths['perc'] = freq_sh_paths.shortest_path_counts / freq_sh_paths.shortest_path_counts.sum()
 	return freq_sh_paths
 
+def pathsWithBackAnalysis(paths_fin_df):
+	# calculate and plot cumulative frequency of 
+	# effective paths taken
+	freq_paths = paths_fin_df['pathlength'].value_counts(sort=True).to_frame()
+	freq_paths.columns=['path_counts']
+	freq_paths['pathlength'] =  freq_paths.index
+	freq_paths = freq_paths.reset_index()
+	freq_paths = freq_paths.sort_values('pathlength')
+	
+	freq_paths['cum_sum'] = freq_paths.path_counts.cumsum()
+	freq_paths['cum_perc'] = freq_paths.cum_sum /     freq_paths.path_counts.sum()
+	freq_paths['perc'] = freq_paths.path_counts / freq_paths.path_counts.sum()
+	return freq_paths
+
 def effectivePathAnalysis(paths_fin_df):
 	
 	def removeBack(l):
@@ -74,21 +88,23 @@ def effectivePathAnalysis(paths_fin_df):
 	freq_eff_paths['cum_perc'] = freq_eff_paths.cum_sum / freq_eff_paths.eff_path_counts.sum()
 	freq_eff_paths['perc'] = freq_eff_paths.eff_path_counts / freq_eff_paths.eff_path_counts.sum()
 
-	return freq_eff_paths
+	return effective_paths_df, freq_eff_paths
 
-def genFreqDistPlots(freq_sh_paths, freq_eff_paths):
-	fig = plt.figure()
-	axes = fig.add_subplot(1,2,1)
-	axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['cum_perc'])
-	axes.set_xlabel('number of clicks')
-	axes.set_ylabel('percentage')
-	axes.set_title('cumulative percentage')
+def genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths):
+	fig = plt.figure(figsize=(15,8))
+	# axes = fig.add_subplot(1,2,1)
+	# axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['cum_perc'])
+	# axes.set_xlabel('number of clicks')
+	# axes.set_ylabel('percentage')
+	# axes.set_title('cumulative percentage')
 	
-	axes = fig.add_subplot(1,2,2)
-	axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['perc'], '-ko')
-	axes.loglog(freq_eff_paths['pathlength'], freq_eff_paths['perc'], '-o')
+	axes = fig.add_subplot(1,1,1)
+	axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['perc'], '-ko', label='optimal')
+	axes.loglog(freq_eff_paths['pathlength'], freq_eff_paths['perc'], '-ro', label='effective')
+	axes.loglog(freq_back_paths['pathlength'], freq_back_paths['perc'], '-bo', label='complete')
 	axes.set_xlabel('number of clicks')
 	axes.set_ylabel('percentage')
+	axes.legend(loc=1)
 	plt.savefig('../plots/path_freq.pdf')
 
 	
@@ -115,11 +131,13 @@ def main():
 	# ================================================================
 	
 	# different types of path lengths based on different pathlength criteria
+	freq_back_paths = pathsWithBackAnalysis(paths_fin_df)
 	freq_sh_paths  = shortest_path_analysis(df_shortest_p)
-	freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
+	effective_paths_df, freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
+	
 
 	# generate frequency distribution plots 
-	genFreqDistPlots(freq_sh_paths, freq_eff_paths)
+	genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths)
 
 
 
