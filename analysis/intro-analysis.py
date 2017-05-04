@@ -21,6 +21,12 @@ def getpathData():
 	paths_fin_df["path"] = paths_fin_df["path"].str.split(pat=';')
 	paths_fin_df["path"] = paths_fin_df["path"].apply(myencode)
 	paths_fin_df['pathlength'] = paths_fin_df["path"].apply(len)
+	getSource = lambda l: l[0] 
+	getTarget = lambda l: l[-1] 
+	getSource_Target = lambda l: l[0] + "|" + l[-1]
+	paths_fin_df['source'] =  paths_fin_df['path'].apply(getSource)
+	paths_fin_df['target'] = paths_fin_df['path'].apply(getTarget)
+	paths_fin_df['source_target'] = paths_fin_df['path'].apply(getSource_Target)
 	return paths_fin_df
 
 def gen_histogram(paths_fin_df):
@@ -107,37 +113,117 @@ def genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths):
 	axes.legend(loc=1)
 	plt.savefig('../plots/path_freq.pdf')
 
-	
-
 
 def main():
+
+	# 1. read in data
 	# read in list of wiki articles used in dataset
 	articles_df = pd.read_csv("../data/wikispeedia_paths-and-graph/mod-articles.tsv", 
 		skip_blank_lines=True, comment='#')
 	# number of different articles (4604)
 	numArticles = len(articles_df)
-
-	# ================================================================
 	# get data from all users that completed wikispeedia paths
 	paths_fin_df = getpathData()
+	st_paths_df = pd.DataFrame( paths_fin_df.groupby(['source', 'target']).size() )
+	#print(st_paths_df.columns)
+	#print( paths_fin_df.loc[ (paths_fin_df['source'] == 'Brain') & (paths_fin_df['target'] == 'Telephone') ])
+	
 
-	# read in matrix of shortest possible paths from one wiki article to next
+
+	# ========================================================================
+	# 2. generate frequency distribution plots
+
+	# # read in matrix of shortest possible paths from one wiki article to next
 	shortest_p = np.loadtxt("../data/wikispeedia_paths-and-graph/mod-shortest-path-distance-matrix.txt",
-		comments='#')
+	 	comments='#')
+	shortest_p_df = pd.DataFrame(data=shortest_p, index = articles_df['articles'], columns=articles_df['articles'])
 	df_shortest_p = pd.DataFrame(data=shortest_p.reshape(shortest_p.shape[0]**2), columns=['path_length'])
 
-	# generate histogram of number of clicks in completed paths
-	gen_histogram(paths_fin_df)
-	# ================================================================
+	# # generate histogram of number of clicks in completed paths
+	# gen_histogram(paths_fin_df)
 	
-	# different types of path lengths based on different pathlength criteria
-	freq_back_paths = pathsWithBackAnalysis(paths_fin_df)
-	freq_sh_paths  = shortest_path_analysis(df_shortest_p)
-	effective_paths_df, freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
-	
+	# # different types of path lengths based on different pathlength criteria
+	# freq_back_paths = pathsWithBackAnalysis(paths_fin_df)
+	# freq_sh_paths  = shortest_path_analysis(df_shortest_p)
+	# effective_paths_df, freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
+	# # ========================================================================
 
-	# generate frequency distribution plots 
-	genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths)
+	# # generate frequency distribution plots 
+	# genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths)
+	
+	# analyze only those users who have source-target path of a certain optimal path length
+	def getOptPath(source, target, data):
+		return data.loc[source, target]
+	def rowFunction(row, data=None):
+		if data is not None:
+			return getOptPath(row['source'], row['target'], data )
+
+
+
+
+	paths_fin_df['opt_path_length'] = paths_fin_df.apply( rowFunction, data=shortest_p_df , axis=1)
+	# list of strings
+	pathopt3 = paths_fin_df["opt_path_length"].loc[paths_fin_df["opt_path_length"] == 3].mean()
+	pathopt4 =  paths_fin_df["opt_path_length"].loc[paths_fin_df["opt_path_length"] == 4].mean()
+	pathopt5 =  paths_fin_df["opt_path_length"].loc[paths_fin_df["opt_path_length"] == 5].mean()
+	pathopt6 =  paths_fin_df["opt_path_length"].loc[paths_fin_df["opt_path_length"] == 6].mean()
+	print(pathopt3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	# for i in range(shortest_p.shape[0]):
+	# 	for j in range(shortest_p.shape[1]):
+	# 		if shortest_p[i,j] == 3:
+	# 			opt3.append( articles[i] + "_" + articles[j] )  
+	# 		elif shortest_p[i,j] == 4:
+	# 			opt3.append( articles[i]  + "_" + articles[j]  )
+	# 		elif shortest_p[i,j] == 5:
+	# 			opt3.append( articles[i] + "_" + articles[j] )
+	# 		elif shortest_p[i,j] == 6:
+	# 			opt3.append( articles[i] + "_" + articles[j] )
+
+	# def isOptimal_path(t, ell):
+	# 	return t in ell
+	# print(opt3.size, opt4.size, opt5.size, opt6.size)
+	
+	# paths_fin_df['optSize'] = .loc[paths_fin_df.source_target.apply(isOptimal_path, opt3)]
+	# paths_fin_df['optSize'] = .loc[paths_fin_df['source_target'].isin(opt4)]
+	# paths_fin_df['optSize'] = .loc[paths_fin_df['source_target'].isin(opt5)]
+	# paths_fin_df['optSize'] = .loc[paths_fin_df['source_target'].isin(opt6)]
+
+	# print(opt3)
+	# print(l3.head(n=10))
+
+
+
+
+
+
 
 
 
