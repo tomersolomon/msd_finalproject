@@ -69,6 +69,7 @@ def main():
 										data=shortest_p_df, col='state2' , axis=1)
 	paths_fin_df2['opt3path_length'] = paths_fin_df2.apply( rowFunction, 
 										data=shortest_p_df, col='state3' , axis=1)
+	paths_fin_df2.to_csv("../task-data/data_with_optimal.csv")
 
 	stats_df = paths_fin_df2[['path', 'state2', 'opt_path_length','opt2path_length', 'opt3path_length' ]]
 	stats_df['ratio1'] = stats_df['opt2path_length'] / stats_df['opt_path_length'] 
