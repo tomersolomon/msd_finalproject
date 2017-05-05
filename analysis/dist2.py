@@ -69,7 +69,7 @@ def main():
 										data=shortest_p_df, col='state2' , axis=1)
 	paths_fin_df2['opt3path_length'] = paths_fin_df2.apply( rowFunction, 
 										data=shortest_p_df, col='state3' , axis=1)
-	paths_fin_df2.to_csv("../task-data/data_with_optimal.csv")
+	paths_fin_df.to_csv("../task-data/data_with_optimal.csv")
 
 	stats_df = paths_fin_df2[['path', 'state2', 'opt_path_length','opt2path_length', 'opt3path_length' ]]
 	stats_df['ratio1'] = stats_df['opt2path_length'] / stats_df['opt_path_length'] 
@@ -77,10 +77,17 @@ def main():
 	
 	fig = plt.figure(figsize=(10,7))
 	axes = fig.add_subplot(1,2,1)
-	stats_df['ratio1'].plot(kind='hist', ax=axes, logy=True, bins=50)
+	axes.set_xlabel('Ratio')
+	axes.set_ylabel('frequency')
+	axes.set_title('2 ST. to Target-OP over original OP')
+	stats_df['ratio1'].plot(kind='hist', ax=axes, logy=True, bins=40)
 
 	axes = fig.add_subplot(1,2,2)
-	stats_df['ratio2'].plot(kind='hist', ax=axes, logy=True, bins=50)
+	axes.set_xlabel('Ratio')
+	axes.set_ylabel('frequency')
+	axes.set_title('3 ST to Target-OP over original OP')
+	stats_df['ratio2'].plot(kind='hist', ax=axes, logy=True, bins=40)
+	plt.savefig("../plots/optimal_path_ratios.pdf")
 	plt.show()
 
 if __name__ == "__main__":
