@@ -98,12 +98,6 @@ def effectivePathAnalysis(paths_fin_df):
 
 def genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths):
 	fig = plt.figure(figsize=(15,8))
-	# axes = fig.add_subplot(1,2,1)
-	# axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['cum_perc'])
-	# axes.set_xlabel('number of clicks')
-	# axes.set_ylabel('percentage')
-	# axes.set_title('cumulative percentage')
-	
 	axes = fig.add_subplot(1,1,1)
 	axes.loglog(freq_sh_paths['path_length'], freq_sh_paths['perc'], '-ko', label='optimal')
 	axes.loglog(freq_eff_paths['pathlength'], freq_eff_paths['perc'], '-ro', label='effective')
@@ -122,105 +116,102 @@ def main():
 		skip_blank_lines=True, comment='#')
 	# number of different articles (4604)
 	numArticles = len(articles_df)
+	
 	# get data from all users that completed wikispeedia paths
 	paths_fin_df = getpathData()
 	st_paths_df = pd.DataFrame( paths_fin_df.groupby(['source', 'target']).size() )
-	print(st_paths_df)
-	#print( paths_fin_df.loc[ (paths_fin_df['source'] == 'Brain') & (paths_fin_df['target'] == 'Telephone') ])
 	
-	print(paths_fin_df.head(n=10))
 
 	# ========================================================================
 	# 2. generate frequency distribution plots
 
-	# # read in matrix of shortest possible paths from one wiki article to next
-	# shortest_p = np.loadtxt("../data/wikispeedia_paths-and-graph/mod-shortest-path-distance-matrix.txt",
-	#  	comments='#')
-	# shortest_p_df = pd.DataFrame(data=shortest_p, index = articles_df['articles'], columns=articles_df['articles'])
-	# df_shortest_p = pd.DataFrame(data=shortest_p.reshape(shortest_p.shape[0]**2), columns=['path_length'])
+	# read in matrix of shortest possible paths from one wiki article to next
+	shortest_p = np.loadtxt("../data/wikispeedia_paths-and-graph/mod-shortest-path-distance-matrix.txt",
+	 	comments='#')
+	shortest_p_df = pd.DataFrame(data=shortest_p, index = articles_df['articles'], columns=articles_df['articles'])
+	df_shortest_p = pd.DataFrame(data=shortest_p.reshape(shortest_p.shape[0]**2), columns=['path_length'])
 
-	# # generate histogram of number of clicks in completed paths
-	# gen_histogram(paths_fin_df)
+	# generate histogram of number of clicks in completed paths
+	gen_histogram(paths_fin_df)
 	
-	# # different types of path lengths based on different pathlength criteria
-	# freq_back_paths = pathsWithBackAnalysis(paths_fin_df)
-	# freq_sh_paths  = shortest_path_analysis(df_shortest_p)
-	# effective_paths_df, freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
-	# # ========================================================================
+	# different types of path lengths based on different pathlength criteria
+	freq_back_paths = pathsWithBackAnalysis(paths_fin_df)
+	freq_sh_paths  = shortest_path_analysis(df_shortest_p)
+	effective_paths_df, freq_eff_paths =  effectivePathAnalysis(paths_fin_df)
+	# ========================================================================
 
-	# # generate frequency distribution plots 
-	# genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths)
+	# generate frequency distribution plots 
+	genFreqDistPlots(freq_sh_paths, freq_eff_paths, freq_back_paths)
 	
 	# analyze only those users who have source-target path of a certain optimal path length
-	# def getOptPath(source, target, data):
-	# 	return data.loc[source, target]
-	# def rowFunction(row, data=None):
-	# 	if data is not None:
-	# 		return getOptPath(row['source'], row['target'], data )
+	def getOptPath(source, target, data):
+		return data.loc[source, target]
+	def rowFunction(row, data=None):
+		if data is not None:
+			return getOptPath(row['source'], row['target'], data )
 
-	# paths_fin_df['opt_path_length'] = paths_fin_df.apply( rowFunction, data=shortest_p_df , axis=1)
-	# path3 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 3]
-	# path4 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 4]
-	# path5 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 5]
-	# path6 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 6]
+	paths_fin_df['opt_path_length'] = paths_fin_df.apply( rowFunction, data=shortest_p_df , axis=1)
+	path3 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 3]
+	path4 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 4]
+	path5 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 5]
+	path6 = paths_fin_df.loc[paths_fin_df["opt_path_length"] == 6]
 
 	# get summary statistics
-	#print( path3["pathlength"].describe() )
-	#print( path4["pathlength"].describe() )
-	#print( path5["pathlength"].describe() )
-	#print( path6["pathlength"].describe() )
+	print( path3["pathlength"].describe() )
+	print( path4["pathlength"].describe() )
+	print( path5["pathlength"].describe() )
+	print( path6["pathlength"].describe() )
 
 	# calculate frequency values for all paths that have a certain optimal path length
-	# freq3 = path3['pathlength'].value_counts(sort=True).to_frame()
-	# freq3.columns = ['path_counts']
-	# freq3['pathlength'] =  freq3.index
-	# freq3 = freq3.reset_index()
-	# freq3 = freq3.sort_values('pathlength')
-	# freq3['cum_sum']  = freq3.path_counts.cumsum()
-	# freq3['cum_perc'] = freq3.cum_sum / freq3.path_counts.sum()
-	# freq3['perc']     = freq3.path_counts / freq3.path_counts.sum()
+	freq3 = path3['pathlength'].value_counts(sort=True).to_frame()
+	freq3.columns = ['path_counts']
+	freq3['pathlength'] =  freq3.index
+	freq3 = freq3.reset_index()
+	freq3 = freq3.sort_values('pathlength')
+	freq3['cum_sum']  = freq3.path_counts.cumsum()
+	freq3['cum_perc'] = freq3.cum_sum / freq3.path_counts.sum()
+	freq3['perc']     = freq3.path_counts / freq3.path_counts.sum()
 
-	# freq4 = path4['pathlength'].value_counts(sort=True).to_frame()
-	# freq4.columns = ['path_counts']
-	# freq4['pathlength'] =  freq4.index
-	# freq4 = freq4.reset_index()
-	# freq4 = freq4.sort_values('pathlength')
-	# freq4['cum_sum']  = freq4.path_counts.cumsum()
-	# freq4['cum_perc'] = freq4.cum_sum / freq4.path_counts.sum()
-	# freq4['perc']     = freq4.path_counts / freq4.path_counts.sum()
+	freq4 = path4['pathlength'].value_counts(sort=True).to_frame()
+	freq4.columns = ['path_counts']
+	freq4['pathlength'] =  freq4.index
+	freq4 = freq4.reset_index()
+	freq4 = freq4.sort_values('pathlength')
+	freq4['cum_sum']  = freq4.path_counts.cumsum()
+	freq4['cum_perc'] = freq4.cum_sum / freq4.path_counts.sum()
+	freq4['perc']     = freq4.path_counts / freq4.path_counts.sum()
 	
-	# freq5 = path5['pathlength'].value_counts(sort=True).to_frame()
-	# freq5.columns = ['path_counts']
-	# freq5['pathlength'] =  freq5.index
-	# freq5 = freq5.reset_index()
-	# freq5 = freq5.sort_values('pathlength')
-	# freq5['cum_sum']  = freq5.path_counts.cumsum()
-	# freq5['cum_perc'] = freq5.cum_sum / freq5.path_counts.sum()
-	# freq5['perc']     = freq5.path_counts / freq5.path_counts.sum()
+	freq5 = path5['pathlength'].value_counts(sort=True).to_frame()
+	freq5.columns = ['path_counts']
+	freq5['pathlength'] =  freq5.index
+	freq5 = freq5.reset_index()
+	freq5 = freq5.sort_values('pathlength')
+	freq5['cum_sum']  = freq5.path_counts.cumsum()
+	freq5['cum_perc'] = freq5.cum_sum / freq5.path_counts.sum()
+	freq5['perc']     = freq5.path_counts / freq5.path_counts.sum()
 	
-	# freq6 = path6['pathlength'].value_counts(sort=True).to_frame()
-	# freq6.columns = ['path_counts']
-	# freq6['pathlength'] =  freq6.index
-	# freq6 = freq6.reset_index()
-	# freq6 = freq6.sort_values('pathlength')
-	# freq6['cum_sum']  = freq6.path_counts.cumsum()
-	# freq6['cum_perc'] = freq6.cum_sum / freq6.path_counts.sum()
-	# freq6['perc']     = freq6.path_counts / freq6.path_counts.sum()
+	freq6 = path6['pathlength'].value_counts(sort=True).to_frame()
+	freq6.columns = ['path_counts']
+	freq6['pathlength'] =  freq6.index
+	freq6 = freq6.reset_index()
+	freq6 = freq6.sort_values('pathlength')
+	freq6['cum_sum']  = freq6.path_counts.cumsum()
+	freq6['cum_perc'] = freq6.cum_sum / freq6.path_counts.sum()
+	freq6['perc']     = freq6.path_counts / freq6.path_counts.sum()
 
-	# fig = plt.figure()
+	fig = plt.figure()
 	
-	# axes = fig.add_subplot(1,1,1)
-	# axes.plot(freq3['pathlength'], freq3['perc'], 'ro-', label='opt3')
-	# axes.plot(freq4['pathlength'], freq4['perc'], 'ko-', label='opt4')
-	# axes.plot(freq5['pathlength'], freq5['perc'], 'bo-', label='opt5')
-	# axes.plot(freq6['pathlength'], freq6['perc'], 'mo-', label='opt6')
+	axes = fig.add_subplot(1,1,1)
+	axes.plot(freq3['pathlength'], freq3['perc'], 'ro-', label='opt3')
+	axes.plot(freq4['pathlength'], freq4['perc'], 'ko-', label='opt4')
+	axes.plot(freq5['pathlength'], freq5['perc'], 'bo-', label='opt5')
 	
-	# axes.set_xlim(0, 20)
-	# axes.set_xlabel('number of clicks')
-	# axes.set_ylabel('percentage')
-	# axes.legend(loc=2)
+	axes.set_xlim(0, 20)
+	axes.set_xlabel('number of clicks')
+	axes.set_ylabel('percentage')
+	axes.legend(loc=2)
 	
-	# plt.show()
+	plt.savefig('../plots/opt3-opt4-opt5.pdf')
 
 
 
