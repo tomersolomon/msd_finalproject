@@ -148,6 +148,7 @@ ggplot(sorted_fin, aes(x = reorder(name, count), y = count)) +
   geom_col() +
   coord_flip() +
   labs(x = "Category", y = "Count", title = "Finished Paths by Category")
+  ggsave(filename='../plots/categories_finished_paths.pdf', width=4, height=4)
 
 ggplot(sorted_fin, aes(x = reorder(name, count), y = count)) +
   geom_point() +
@@ -172,6 +173,7 @@ ggplot(sorted_source_target_fin, aes(x = reorder(name, total), y = total)) +
   geom_col() +
   coord_flip() +
   labs(x = "Category", y = "Count", title = "Finished Path Sources and Targets by Category")
+  ggsave(filename='../plots/categories_source_target.pdf', width=4, height=4)
 
 ggplot(sorted_source_target_fin, aes(x = reorder(name, total), y = total)) +
   geom_point() +

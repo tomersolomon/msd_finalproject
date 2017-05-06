@@ -56,6 +56,7 @@ summary(fit)
 ggplot(article_summary, aes(x = num_words, y = num_links)) +
   geom_point() +
   labs(x = "Number of words", y = "Number of links", title = "Article Connections")
+  ggsave(filename='../plots/regression_article_size_links.pdf', width=4, height=4)
 
 # log scale 
 ggplot(article_summary, aes(x = num_words, y = num_links)) +
