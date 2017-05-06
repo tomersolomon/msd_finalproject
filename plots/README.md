@@ -1,0 +1,1 @@
+This directory contains all necessary plots in our final presentation and in our powerpoint.  See ../analysis/README.md to see which scripts generate which plots. 
