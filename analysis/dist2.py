@@ -88,7 +88,6 @@ def main():
 	axes.set_title('3 ST to Target-OP over original OP')
 	stats_df['ratio2'].plot(kind='hist', ax=axes, logy=True, bins=40)
 	plt.savefig("../plots/optimal_path_ratios.pdf")
-	plt.show()
 
 if __name__ == "__main__":
 	main()
